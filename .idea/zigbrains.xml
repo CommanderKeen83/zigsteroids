@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ZLSSettings">
+    <option name="zlsPath" value="$PROJECT_DIR$/../../compilers/zls/zig-out/bin/zls" />
+  </component>
+  <component name="ZigProjectSettings">
+    <option name="toolchainHomeDirectory" value="$PROJECT_DIR$/../../compilers/zig-linux-x86_64-0.15.0-dev.337+4e700fdf8" />
+  </component>
+  <component name="ZigToolchain" toolchain="fd84fab7-dc15-4420-ae0a-fab24edf6c48" />
+</project>
