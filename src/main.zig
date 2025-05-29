@@ -1,5 +1,6 @@
 const std = @import("std");
 const rl = @import("raylib");
+const Game = @import("game.zig").Game;
 const math = std.math;
 
 const SCREEN_WIDTH = 800;
