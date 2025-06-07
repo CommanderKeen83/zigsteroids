@@ -2,6 +2,7 @@ const rl = @import("raylib");
 
 pub const ROTATION_SPEED = 1.5;
 pub const SHIP_SPEED = 10.0;
+pub const THICKNESS = 1.5;
 
 const Asteroid = struct {
     position: rl.Vector2,

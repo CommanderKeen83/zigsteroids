@@ -7,8 +7,6 @@ const Ship = entities.Ship;
 const SCREEN_WIDTH = 800;
 const SCREEN_HEIGHT = 600;
 
-const THICKNESS = 1.5;
-
 const State = struct {
     now: f32,
     delta: f32,
@@ -63,7 +61,7 @@ fn drawLines(origin: rl.Vector2, scale: f32, rotation: f32, points: []const rl.V
         rl.drawLineEx(
             transformer.apply(points[i]),
             transformer.apply(points[(i + 1) % points.len]),
-            THICKNESS,
+            entities.THICKNESS,
             rl.Color.red,
         );
     }
