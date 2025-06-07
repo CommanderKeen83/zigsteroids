@@ -118,7 +118,7 @@ pub const Game = struct {
             @mod(state.ship.position.y, SCREEN_HEIGHT),
         );
     }
-    pub fn render(self: @This()) void {
+    pub fn render(self: Game) void {
         _ = self;
         drawLines(
             state.ship.position,
