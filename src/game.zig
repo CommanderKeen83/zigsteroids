@@ -1,36 +1,20 @@
 const std = @import("std");
 const rl = @import("raylib");
 const math = std.math;
+const entities = @import("entities.zig");
+const Ship = entities.Ship;
 
 const SCREEN_WIDTH = 800;
 const SCREEN_HEIGHT = 600;
-const ROTATION_SPEED = 1.5;
-const SHIP_SPEED = 10.0;
 
 const THICKNESS = 1.5;
-
-const Ship = struct {
-    position: rl.Vector2,
-    velocity: rl.Vector2,
-    rotation: f32,
-    deathtime: f32 = 0.0,
-    pub fn isDeath(self: @This()) bool {
-        return self.deathtime != 0.0;
-    }
-};
-const Asteroid = struct {
-    position: rl.Vector2,
-    velocity: rl.Vector2,
-    size: AsteroidSize,
-};
-
-const AsteroidSize = enum { BIG, MEDIUM, SMALL };
 
 const State = struct {
     now: f32,
     delta: f32,
     ship: Ship,
 };
+// global state object
 var state: State = .{
     .now = 0.0,
     .delta = 0.0,
@@ -56,22 +40,6 @@ fn drawCoordinateGrid() void {
     );
 }
 
-const localBoundariesShip = [_]rl.Vector2{
-    rl.Vector2{ .x = -0.30, .y = -0.20 },
-    rl.Vector2{ .x = -0.10, .y = -0.10 },
-    rl.Vector2{ .x = 0.10, .y = -0.10 },
-    rl.Vector2{ .x = 0.30, .y = -0.20 },
-    rl.Vector2{ .x = 0.30, .y = 0.10 },
-    rl.Vector2{ .x = 0.20, .y = 0.10 },
-    rl.Vector2{ .x = 0.0, .y = 0.30 },
-    rl.Vector2{ .x = -0.20, .y = 0.10 },
-    rl.Vector2{ .x = -0.30, .y = 0.10 },
-};
-const localShipThruster = [_]rl.Vector2{
-    rl.Vector2{ .x = -0.10, .y = -0.10 },
-    rl.Vector2{ .x = 0.0, .y = -0.40 },
-    rl.Vector2{ .x = 0.10, .y = -0.10 },
-};
 fn drawLines(origin: rl.Vector2, scale: f32, rotation: f32, points: []const rl.Vector2) void {
     const Transformer = struct {
         origin: rl.Vector2,
@@ -112,17 +80,17 @@ pub const Game = struct {
             .height = l_height,
         };
     }
-    pub fn deinit(self: @This()) void {
+    pub fn deinit(self: Game) void {
         _ = self;
         rl.closeWindow();
     }
-    fn processPlayerInput(self: @This()) void {
+    fn processPlayerInput(self: Game) void {
         _ = self;
         if (rl.isKeyDown(rl.KeyboardKey.a)) {
-            state.ship.rotation -= state.delta * std.math.tau * ROTATION_SPEED;
+            state.ship.rotation -= state.delta * std.math.tau * entities.ROTATION_SPEED;
         }
         if (rl.isKeyDown(rl.KeyboardKey.d)) {
-            state.ship.rotation += state.delta * std.math.tau * ROTATION_SPEED;
+            state.ship.rotation += state.delta * std.math.tau * entities.ROTATION_SPEED;
         }
         if (rl.isKeyDown(rl.KeyboardKey.w)) {
             const adjusted_angle = state.ship.rotation + std.math.pi / 2.0;
@@ -132,7 +100,7 @@ pub const Game = struct {
             );
             state.ship.velocity = rl.math.vector2Add(
                 state.ship.velocity,
-                rl.math.vector2Scale(shipDirection, state.delta * SHIP_SPEED),
+                rl.math.vector2Scale(shipDirection, state.delta * entities.SHIP_SPEED),
             );
         }
     }
@@ -144,6 +112,7 @@ pub const Game = struct {
         const DRAG = 0.01;
         state.ship.velocity = rl.math.vector2Scale(state.ship.velocity, 1.0 - DRAG);
         state.ship.position = rl.math.vector2Add(state.ship.position, state.ship.velocity);
+
         state.ship.position = rl.Vector2.init(
             @mod(state.ship.position.x, SCREEN_WIDTH),
             @mod(state.ship.position.y, SCREEN_HEIGHT),
@@ -155,7 +124,7 @@ pub const Game = struct {
             state.ship.position,
             50,
             state.ship.rotation,
-            &localBoundariesShip,
+            &entities.localBoundariesShip,
         );
         // Draw Ship Thruster
         if (rl.isKeyDown(rl.KeyboardKey.w) and @mod(@as(i32, @intFromFloat(state.now * 10)), 2) == 0) {
@@ -163,7 +132,7 @@ pub const Game = struct {
                 state.ship.position,
                 50,
                 state.ship.rotation,
-                &localShipThruster,
+                &entities.localShipThruster,
             );
         }
         drawCoordinateGrid();
