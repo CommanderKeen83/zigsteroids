@@ -11,17 +11,9 @@ const State = struct {
     now: f32,
     delta: f32,
     ship: Ship,
+    projectiles: std.ArrayList(entities.Projectile),
 };
 // global state object
-var state: State = .{
-    .now = 0.0,
-    .delta = 0.0,
-    .ship = .{
-        .position = rl.Vector2.init(400, 100),
-        .velocity = rl.Vector2.init(0, 0.0),
-        .rotation = 0.0,
-    },
-};
 
 fn drawCoordinateGrid() void {
     rl.drawLineEx(
@@ -37,7 +29,9 @@ fn drawCoordinateGrid() void {
         rl.Color.blue,
     );
 }
-
+fn drawProjectiles(pos: rl.Vector2) void {
+    rl.drawCircleV(pos, 1.0, rl.Color.red);
+}
 fn drawLines(origin: rl.Vector2, scale: f32, rotation: f32, points: []const rl.Vector2) void {
     const Transformer = struct {
         origin: rl.Vector2,
@@ -70,72 +64,77 @@ fn drawLines(origin: rl.Vector2, scale: f32, rotation: f32, points: []const rl.V
 pub const Game = struct {
     width: i32,
     height: i32,
-    pub fn init(l_width: i32, l_height: i32) !Game {
+    state: State,
+    pub fn init(allocator: std.mem.Allocator, l_width: i32, l_height: i32) !Game {
         rl.initWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Algebra");
         rl.setTargetFPS(60);
         return .{
             .width = l_width,
             .height = l_height,
+            .state = .{
+                .now = 0.0,
+                .delta = 0.0,
+                .ship = .{
+                    .position = rl.Vector2.init(400, 100),
+                    .velocity = rl.Vector2.init(0, 0.0),
+                    .rotation = 0.0,
+                },
+                .projectiles = std.ArrayList(entities.Projectile).init(allocator),
+            },
         };
     }
-    pub fn deinit(self: Game) void {
+    pub fn deinit(self: *Game) void {
         _ = self;
         rl.closeWindow();
     }
-    fn processPlayerInput(self: Game) void {
-        _ = self;
+    fn processPlayerInput(self: *Game) void {
         if (rl.isKeyDown(rl.KeyboardKey.a)) {
-            state.ship.rotation -= state.delta * std.math.tau * entities.ROTATION_SPEED;
+            self.state.ship.rotation -= self.state.delta * std.math.tau * entities.ROTATION_SPEED;
         }
         if (rl.isKeyDown(rl.KeyboardKey.d)) {
-            state.ship.rotation += state.delta * std.math.tau * entities.ROTATION_SPEED;
+            self.state.ship.rotation += self.state.delta * std.math.tau * entities.ROTATION_SPEED;
         }
         if (rl.isKeyDown(rl.KeyboardKey.w)) {
-            const adjusted_angle = state.ship.rotation + std.math.pi / 2.0;
-            const shipDirection: rl.Vector2 = rl.Vector2.init(
-                @cos(adjusted_angle),
-                @sin(adjusted_angle),
-            );
-            state.ship.velocity = rl.math.vector2Add(
-                state.ship.velocity,
-                rl.math.vector2Scale(shipDirection, state.delta * entities.SHIP_SPEED),
+            self.state.ship.velocity = rl.math.vector2Add(
+                self.state.ship.velocity,
+                rl.math.vector2Scale(self.state.ship.getDirection(), self.state.delta * entities.SHIP_SPEED),
             );
         }
+        if (rl.isKeyDown(rl.KeyboardKey.space)) {}
     }
-    pub fn update(self: @This()) void {
-        state.delta = rl.getFrameTime();
-        state.now += state.delta;
+    pub fn update(self: *Game) void {
+        self.state.delta = rl.getFrameTime();
+        self.state.now += self.state.delta;
         self.processPlayerInput();
 
         const DRAG = 0.01;
-        state.ship.velocity = rl.math.vector2Scale(state.ship.velocity, 1.0 - DRAG);
-        state.ship.position = rl.math.vector2Add(state.ship.position, state.ship.velocity);
+        self.state.ship.velocity = rl.math.vector2Scale(self.state.ship.velocity, 1.0 - DRAG);
+        self.state.ship.position = rl.math.vector2Add(self.state.ship.position, self.state.ship.velocity);
 
-        state.ship.position = rl.Vector2.init(
-            @mod(state.ship.position.x, SCREEN_WIDTH),
-            @mod(state.ship.position.y, SCREEN_HEIGHT),
+        self.state.ship.position = rl.Vector2.init(
+            @mod(self.state.ship.position.x, SCREEN_WIDTH),
+            @mod(self.state.ship.position.y, SCREEN_HEIGHT),
         );
     }
-    pub fn render(self: Game) void {
-        _ = self;
+    pub fn render(self: *Game) void {
         drawLines(
-            state.ship.position,
+            self.state.ship.position,
             50,
-            state.ship.rotation,
+            self.state.ship.rotation,
             &entities.localBoundariesShip,
         );
         // Draw Ship Thruster
-        if (rl.isKeyDown(rl.KeyboardKey.w) and @mod(@as(i32, @intFromFloat(state.now * 10)), 2) == 0) {
+        if (rl.isKeyDown(rl.KeyboardKey.w) and @mod(@as(i32, @intFromFloat(self.state.now * 10)), 2) == 0) {
             drawLines(
-                state.ship.position,
+                self.state.ship.position,
                 50,
-                state.ship.rotation,
+                self.state.ship.rotation,
                 &entities.localShipThruster,
             );
         }
         drawCoordinateGrid();
     }
-    pub fn run(self: @This()) !void {
+    pub fn run(self: *Game) !void {
         while (!rl.windowShouldClose()) {
             rl.beginDrawing();
             defer rl.endDrawing();
