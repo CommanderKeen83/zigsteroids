@@ -13,7 +13,6 @@ const State = struct {
     ship: Ship,
     projectiles: std.ArrayList(entities.Projectile),
 };
-// global state object
 
 fn drawCoordinateGrid() void {
     rl.drawLineEx(
