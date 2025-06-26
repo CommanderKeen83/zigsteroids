@@ -29,7 +29,10 @@ fn drawCoordinateGrid() void {
         rl.Color.blue,
     );
 }
-
+fn drawHealthBar(healthbar: ui.PlayerHealthBar) void {
+    const healthbarRect: rl.Rectangle = rl.Rectangle.init(healthbar.position.x, healthbar.position.y, healthbar.size.x, healthbar.size.y);
+    rl.drawRectangleRec(healthbarRect, healthbar.color);
+}
 fn drawLines(origin: rl.Vector2, scale: f32, rotation: f32, points: []const rl.Vector2) void {
     const Transformer = struct {
         origin: rl.Vector2,

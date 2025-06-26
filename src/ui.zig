@@ -17,4 +17,10 @@ const HealthColor = enum {
         return .Maroon;
     }
 };
-pub const PlayerHealthBar = struct { maxHealth: u16, currentHealth: u16 };
+pub const PlayerHealthBar = struct {
+    maxHealth: u16,
+    currentHealth: u16,
+    position: rl.Vector2 = rl.Vector2.init(0, 0),
+    size: rl.Vector2 = rl.Vector2.init(300, 100),
+    color: HealthColor = HealthColor.DarkGreen,
+};
