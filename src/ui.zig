@@ -1,0 +1,20 @@
+const std = @import("std");
+const rl = @import("raylib");
+
+const HealthColor = enum {
+    DarkGreen,
+    Lime,
+    Green,
+    Yellow,
+    Gold,
+    Orange,
+    Red,
+    Maroon,
+    fn getColorFromHealth(health: u8) HealthColor {
+        if (health > 80) {
+            return .DarkGreen;
+        }
+        return .Maroon;
+    }
+};
+pub const PlayerHealthBar = struct { maxHealth: u16, currentHealth: u16 };

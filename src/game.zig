@@ -2,6 +2,7 @@ const std = @import("std");
 const rl = @import("raylib");
 const math = std.math;
 const entities = @import("entities.zig");
+const ui = @import("ui.zig");
 const Ship = entities.Ship;
 
 const SCREEN_WIDTH = 800;
@@ -67,6 +68,11 @@ pub const Game = struct {
     height: i32,
     state: State,
     pub fn init(allocator: std.mem.Allocator, l_width: i32, l_height: i32) !Game {
+        const dance = ui.PlayerHealthBar{
+            .maxHealth = 100,
+            .currentHealth = 100,
+        };
+        _ = dance;
         rl.initWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Algebra");
         rl.setTargetFPS(60);
         return .{
