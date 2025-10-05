@@ -73,7 +73,6 @@ pub const Asteroid = struct{
             .size = size,
             .dead = false,
             .shape = shape,
-
         };
     }
     pub fn init_random_at_edge(size: AsteroidSize, random: std.Random,) Asteroid{
@@ -82,14 +81,14 @@ pub const Asteroid = struct{
 
         const edge_int = random.int(u8) % @typeInfo(ScreenEdge).@"enum".fields.len;
         const screen_edge: ScreenEdge = @enumFromInt(edge_int);
-//
+
 //  if the asteroid spawns outside the screen, it must move towards the center of the screen
 //  meaning when
 //  spawned on Top: move down (positive y)
 //  spawned on Bottom: move up (negative y)
 //  spawned on Left:  move right (positive x)
 //  spawned on Right: move left (negative x)
-//
+
         switch (screen_edge){
             .Top => {
                 pos = rl.Vector2{
@@ -132,7 +131,6 @@ pub const Asteroid = struct{
                 };
             },
         }
-
         return init(pos, vel, size, random);
     }
     pub fn kill(self: *Asteroid) void{
@@ -142,8 +140,11 @@ pub const Asteroid = struct{
         return self.dead;
     }
     fn wrap_ship_around_screen(self: *Asteroid) void{
-        self.pos.x = @mod(self.pos.x, SCREEN_WIDTH);
-        self.pos.y = @mod(self.pos.y, SCREEN_HEIGHT);
+        const buffer = 50;
+        if(self.pos.x < -buffer) { self.pos.x = SCREEN_WIDTH + buffer; }
+        if(self.pos.x > SCREEN_WIDTH + buffer) { self.pos.x = -buffer; }
+        if(self.pos.y < -buffer) { self.pos.y = SCREEN_HEIGHT + buffer; }
+        if(self.pos.y > SCREEN_HEIGHT + buffer) {self.pos.y = -buffer; }
     }
     pub fn get_split_size(self: * const Asteroid) ?AsteroidSize{
         return switch(self.size){
