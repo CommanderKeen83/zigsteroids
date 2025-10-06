@@ -140,11 +140,11 @@ pub const Asteroid = struct{
         return self.dead;
     }
     fn wrap_ship_around_screen(self: *Asteroid) void{
-        const buffer = 50;
-        if(self.pos.x < -buffer) { self.pos.x = SCREEN_WIDTH + buffer; }
-        if(self.pos.x > SCREEN_WIDTH + buffer) { self.pos.x = -buffer; }
-        if(self.pos.y < -buffer) { self.pos.y = SCREEN_HEIGHT + buffer; }
-        if(self.pos.y > SCREEN_HEIGHT + buffer) {self.pos.y = -buffer; }
+        const WRAP_BUFFER = 50;
+        if(self.pos.x < -WRAP_BUFFER) { self.pos.x = SCREEN_WIDTH + WRAP_BUFFER; }
+        if(self.pos.x > SCREEN_WIDTH + WRAP_BUFFER) { self.pos.x = -WRAP_BUFFER; }
+        if(self.pos.y < -WRAP_BUFFER) { self.pos.y = SCREEN_HEIGHT + WRAP_BUFFER; }
+        if(self.pos.y > SCREEN_HEIGHT + WRAP_BUFFER) {self.pos.y = -WRAP_BUFFER; }
     }
     pub fn get_split_size(self: * const Asteroid) ?AsteroidSize{
         return switch(self.size){
