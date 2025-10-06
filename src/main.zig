@@ -11,6 +11,14 @@ const SCREEN_WIDTH = @import("globals.zig").SCREEN_WIDTH;
 const SCREEN_HEIGHT = @import("globals.zig").SCREEN_HEIGHT;
 
 
+fn create_asteroids(number_of_asteroids: usize, random: std.Random, asteroids: *std.array_list.Managed(Asteroid)) !void{
+    for(0 .. number_of_asteroids)|_|{
+        var size: AsteroidSize = undefined;
+        const rand_size = random.int(u8) % @typeInfo(AsteroidSize).@"enum".fields.len;
+        size = @enumFromInt(rand_size);
+        try asteroids.append(Asteroid.init_random_at_edge(size,random,));
+    }
+}
 
 fn check_collision_circle(pos1: rl.Vector2, radius1: f32, pos2: rl.Vector2, radius2: f32) bool {
     const delta_x = pos1.x - pos2.x;
@@ -24,6 +32,11 @@ fn check_collision_circle(pos1: rl.Vector2, radius1: f32, pos2: rl.Vector2, radi
 pub fn main() anyerror!void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
+
+    var lives:i32 = 3;
+    var is_game_over = false;
+//    var score = 0;
+    var wave: u8 = 1;
     var bullets = std.array_list.Managed(Bullet).init(allocator);
     defer bullets.deinit();
     var asteroids = std.array_list.Managed(Asteroid).init(allocator);
@@ -33,21 +46,13 @@ pub fn main() anyerror!void {
 
     rl.initWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "raylib-zig [core] example - basic window");
     defer rl.closeWindow(); // Close window and OpenGL context
+                            //
 
     rl.setTargetFPS(60); // Set our game to run at 60 frames-per-second
     var ship = Ship.init(SCREEN_WIDTH / 2.0, SCREEN_HEIGHT / 2.0, false);
     var rng = std.Random.DefaultPrng.init(1234);
     const random = rng.random();
-    for(0 .. 6)|_|{
-        var size: AsteroidSize = undefined;
-        const rand_size = random.int(u8) % @typeInfo(AsteroidSize).@"enum".fields.len;
-        size = @enumFromInt(rand_size);
-        try asteroids.append(Asteroid.init_random_at_edge(
-            size,
-            random,
-            )
-        );
-    }
+    try create_asteroids(6, random, &asteroids);
 
     while (!rl.windowShouldClose()) { // Detect window close button or ESC key
         const frametime = rl.getFrameTime();
@@ -61,6 +66,34 @@ pub fn main() anyerror!void {
             try bullets.append(Bullet.init(pos, ship.get_angle()));
         }
         // update
+        if(ship.is_dead()){
+            lives -= 1;
+            if(lives == 0){
+                is_game_over = true;
+            }
+            else{
+                ship = Ship.init(SCREEN_WIDTH / 2.0, SCREEN_HEIGHT / 2.0, true);
+            }
+        }
+        if(is_game_over){
+            rl.drawText(
+                "Game over. Press r to restart",
+                @intFromFloat(SCREEN_WIDTH / 2.0 - 150),
+                @intFromFloat(SCREEN_HEIGHT / 2.0),
+                10,
+                rl.Color.dark_green,
+            );
+            if(rl.isKeyPressed(rl.KeyboardKey.r)){
+                is_game_over = false;
+                lives = 3;
+                wave = 0;
+                ship = Ship.init(SCREEN_WIDTH / 2.0, SCREEN_HEIGHT / 2.0, false);
+                asteroids.clearRetainingCapacity();
+                try create_asteroids(6, random, &asteroids);
+            }
+            continue;
+        }
+
         ship.update(frametime);
         for(asteroids.items)|*asteroid| {
             asteroid.update(frametime);
@@ -95,10 +128,6 @@ pub fn main() anyerror!void {
                 }
             }
         }
-        if(ship.is_dead()){
-            ship = Ship.init(SCREEN_WIDTH / 2.0, SCREEN_HEIGHT / 2.0, true);
-        }
-
 
         //clean up
         var i: usize = bullets.items.len; // start at the end;
@@ -115,9 +144,19 @@ pub fn main() anyerror!void {
                 _ = asteroids.swapRemove(j);
             }
         }
+        if(asteroids.items.len == 0 and !is_game_over){
+            wave += 1;
+            try create_asteroids(6 * wave, random, &asteroids);
+        }
+
         //Drawing
         for(asteroids.items)|*asteroid| {asteroid.draw();}
         for(bullets.items)|bullet|{bullet.draw();}
+
+        var lives_buffer: [16]u8 = undefined;
+        const lives_text = std.fmt.bufPrintZ(&lives_buffer, "Lives: {d}", .{lives}) catch "Lives ?";
+        rl.drawText(lives_text, 10, 10, 10, rl.Color.dark_green);
+
         ship.draw();
     }
 }
