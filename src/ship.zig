@@ -10,19 +10,25 @@ pub const Ship = struct{
     vel: rl.Vector2,
     angle: f32, // in degrees
     size: f32,
+    scale: f32,
+    invincibility_timer: f32,
+    dead: bool,
     hull:  [5] rl.Vector2,
     const ROTATION_SPEED = 300.0;
     const THRUST_POWER = 200.0;
     const FRICTION = 0.99;
     const HULL_THICKNESS = 2.0;
+   pub const INVICIBLE_TIME = 3.0;
 
-
-    pub fn init(x: f32, y:f32) Ship{
+    pub fn init(x: f32, y:f32, should_be_invincible: bool) Ship{
         return Ship{
             .pos = rl.Vector2.init(x, y),
             .vel = rl.Vector2.init(0,0),
             .angle = 0, // point up
-            .size = 80.0,
+            .size = 12,
+            .scale = 80.0,
+            .invincibility_timer = if(should_be_invincible) INVICIBLE_TIME else 0.0,
+            .dead = false,
             .hull = .{
                 rl.Vector2{.x = 0, .y = -0.1}, // nose
                 rl.Vector2{.x = 0.1, .y = 0.2}, // right bottom
@@ -34,7 +40,9 @@ pub const Ship = struct{
     }
     pub fn update(self: *Ship, dt: f32) void{
         passed_time += dt;
-
+        if(self.invincibility_timer > 0) {
+            self.invincibility_timer -= dt;
+        }
         self.handle_input(dt);
         self.apply_physics(dt);
         self.wrap_ship_around_screen();
@@ -66,7 +74,7 @@ pub const Ship = struct{
     }
     fn get_transform(self: *const Ship, pos: rl.Vector2) rl.Vector2{
         const rad = self.angle * math.pi / 180.0;
-        const rotation = rl.math.vector2Scale(rl.math.vector2Rotate(pos, rad), self.size);
+        const rotation = rl.math.vector2Scale(rl.math.vector2Rotate(pos, rad), self.scale);
 
         return rl.Vector2{
             .x = (self.pos.x + rotation.x),
@@ -75,16 +83,28 @@ pub const Ship = struct{
     }
     pub fn draw(self: *const Ship) void {
         // Ship Drawing
-
         for(0 .. self.hull.len) |i|{
             const p1 = self.get_transform(self.hull[i]);
             const p2 = self.get_transform(self.hull[(i + 1) % self.hull.len]);
-            rl.drawLineEx(
-                p1,
-                p2,
-                Ship.HULL_THICKNESS,
-                rl.Color.white,
-            );
+            if(self.invincibility_timer > 0){
+                //flicker hull
+                const flicker_cycle = @mod(passed_time, 0.5);
+                if(flicker_cycle < 0.25){
+                    rl.drawLineEx(
+                        p1,
+                        p2,
+                        Ship.HULL_THICKNESS,
+                        rl.Color.white,
+                    );
+                }
+            }else{
+                rl.drawLineEx(
+                    p1,
+                    p2,
+                    Ship.HULL_THICKNESS,
+                    rl.Color.white,
+                );
+            }
         }
         // Flame Drawing
         if(rl.isKeyDown(rl.KeyboardKey.w) or rl.isKeyDown(rl.KeyboardKey.up)){
@@ -102,5 +122,14 @@ pub const Ship = struct{
     }
     pub fn get_angle(self: *Ship) f32{
         return self.angle;
+    }
+    pub fn kill(self: *Ship) void {
+        self.dead = true;
+    }
+    pub fn is_dead(self:*const Ship) bool{
+        return self.dead;
+    }
+    pub fn is_invicible(self: *const Ship) bool{
+        return self.invincibility_timer > 0;
     }
 };

@@ -35,7 +35,7 @@ pub fn main() anyerror!void {
     defer rl.closeWindow(); // Close window and OpenGL context
 
     rl.setTargetFPS(60); // Set our game to run at 60 frames-per-second
-    var ship = Ship.init(SCREEN_WIDTH / 2.0, SCREEN_HEIGHT / 2.0);
+    var ship = Ship.init(SCREEN_WIDTH / 2.0, SCREEN_HEIGHT / 2.0, false);
     var rng = std.Random.DefaultPrng.init(1234);
     const random = rng.random();
     for(0 .. 6)|_|{
@@ -86,6 +86,20 @@ pub fn main() anyerror!void {
             }
         }
         try asteroids.appendSlice(temp_asteroids.items);
+
+        if(!ship.is_invicible()){
+            for(asteroids.items)|asteroid|{
+                if(check_collision_circle(ship.pos, ship.size, asteroid.pos, asteroid.radius)){
+                    ship.kill();
+                    break;
+                }
+            }
+        }
+        if(ship.is_dead()){
+            ship = Ship.init(SCREEN_WIDTH / 2.0, SCREEN_HEIGHT / 2.0, true);
+        }
+
+
         //clean up
         var i: usize = bullets.items.len; // start at the end;
         while (i > 0){
