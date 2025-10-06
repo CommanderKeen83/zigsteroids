@@ -72,7 +72,6 @@ pub fn main() anyerror!void {
         // Collision Detection
         temp_asteroids.clearRetainingCapacity();
         for(bullets.items) |*bullet|{
-            bullet.update(frametime);
             for(asteroids.items)|*asteroid|{
                 if(check_collision_circle(bullet.pos, bullet.size, asteroid.pos, asteroid.radius)){
                     if(asteroid.get_split_size())|asteroid_size|{
@@ -85,12 +84,12 @@ pub fn main() anyerror!void {
                     asteroid.kill();
                 }
             }
-            try asteroids.appendSlice(temp_asteroids.items);
         }
+        try asteroids.appendSlice(temp_asteroids.items);
         //clean up
         var i: usize = bullets.items.len; // start at the end;
         while (i > 0){
-            i -= 1; // go one back, otherwise we will be out of scope when
+            i -= 1; // go one back, otherwise we will be out of scope
             if(bullets.items[i].is_dead()){
                 _ = bullets.swapRemove(i);
             }
