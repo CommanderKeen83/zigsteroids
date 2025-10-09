@@ -75,7 +75,7 @@ pub const Asteroid = struct{
             .shape = shape,
         };
     }
-    pub fn init_random_at_edge(size: AsteroidSize, random: std.Random,) Asteroid{
+    pub fn init_random_at_edge(size: AsteroidSize, random: std.Random, speedMultiplier: f32) Asteroid{
         var pos: rl.Vector2 = undefined;
         var vel: rl.Vector2 = undefined;
 
@@ -96,8 +96,8 @@ pub const Asteroid = struct{
                     .y = -LARGE_RADIUS
                 };
                 vel = rl.Vector2{
-                    .x = (random.float(f32) - 0.5) * BASE_SPEED * 2.0,
-                    .y = random.float(f32) * BASE_SPEED
+                    .x = (random.float(f32) - 0.5) * BASE_SPEED * 2.0 * speedMultiplier,
+                    .y = random.float(f32) * BASE_SPEED * speedMultiplier,
                 };
             },
             .Left => {
@@ -106,8 +106,8 @@ pub const Asteroid = struct{
                     .y = random.float(f32) * SCREEN_HEIGHT,
                 };
                 vel = rl.Vector2{
-                    .x = random.float(f32) * BASE_SPEED,
-                    .y = (random.float(f32) - 0.5) * BASE_SPEED * 2.0,
+                    .x = random.float(f32) * BASE_SPEED * speedMultiplier,
+                    .y = (random.float(f32) - 0.5) * BASE_SPEED * 2.0 * speedMultiplier,
                 };
             },
             .Right =>{
@@ -116,8 +116,8 @@ pub const Asteroid = struct{
                     .y = random.float(f32) * SCREEN_HEIGHT,
                 };
                 vel = rl.Vector2{
-                    .x = random.float(f32) * -BASE_SPEED,
-                    .y = (random.float(f32) - 0.5) * BASE_SPEED * 2.0,
+                    .x = random.float(f32) * -BASE_SPEED * speedMultiplier,
+                    .y = (random.float(f32) - 0.5) * BASE_SPEED * 2.0 * speedMultiplier,
                 };
             },
             .Bottom =>{
@@ -126,8 +126,8 @@ pub const Asteroid = struct{
                     .y = SCREEN_HEIGHT + LARGE_RADIUS,
                 };
                 vel = rl.Vector2{
-                    .x = (random.float(f32) - 0.5) * BASE_SPEED * 2.0,
-                    .y = random.float(f32) * -BASE_SPEED,
+                    .x = (random.float(f32) - 0.5) * BASE_SPEED * 2.0 * speedMultiplier,
+                    .y = random.float(f32) * -BASE_SPEED * speedMultiplier,
                 };
             },
         }

@@ -6,18 +6,23 @@ const math = std.math;
 const Ship = @import("ship.zig").Ship;
 const Bullet = @import("bullet.zig").Bullet;
 const Asteroid = @import("asteroid.zig").Asteroid;
+const Enemy = @import("enemy.zig").Enemy;
 const AsteroidSize = @import("asteroid.zig").AsteroidSize;
 const SCREEN_WIDTH = @import("globals.zig").SCREEN_WIDTH;
 const SCREEN_HEIGHT = @import("globals.zig").SCREEN_HEIGHT;
 
 
-fn create_asteroids(number_of_asteroids: usize, random: std.Random, asteroids: *std.array_list.Managed(Asteroid)) !void{
+fn create_asteroids(number_of_asteroids: usize, wave: u8, random: std.Random, asteroids: *std.array_list.Managed(Asteroid)) !void{
     for(0 .. number_of_asteroids)|_|{
         var size: AsteroidSize = undefined;
         const rand_size = random.int(u8) % @typeInfo(AsteroidSize).@"enum".fields.len;
         size = @enumFromInt(rand_size);
-        try asteroids.append(Asteroid.init_random_at_edge(size,random,));
+        const speed_multiplier: f32 = @floatFromInt(wave);
+        try asteroids.append(Asteroid.init_random_at_edge(size,random, speed_multiplier));
     }
+}
+fn get_direction_to_player(player_position: rl.Vector2, enemy_position: rl.Vector2) rl.Vector2{
+    return rl.math.vector2Normalize(rl.math.vector2Subtract(player_position, enemy_position));
 }
 
 fn check_collision_circle(pos1: rl.Vector2, radius1: f32, pos2: rl.Vector2, radius2: f32) bool {
@@ -35,10 +40,14 @@ pub fn main() anyerror!void {
 
     var lives:i32 = 3;
     var is_game_over = false;
-//    var score = 0;
-    var wave: u8 = 1;
+    var score: i32 = 0;
+    var wave: u8 = 3;
     var bullets = std.array_list.Managed(Bullet).init(allocator);
     defer bullets.deinit();
+    var enemy_bullets = std.array_list.Managed(Bullet).init(allocator);
+    defer enemy_bullets.deinit();
+    var enemies = std.array_list.Managed(Enemy).init(allocator);
+    defer enemies.deinit();
     var asteroids = std.array_list.Managed(Asteroid).init(allocator);
     defer asteroids.deinit();
     var temp_asteroids = std.array_list.Managed(Asteroid).init(allocator);
@@ -46,13 +55,12 @@ pub fn main() anyerror!void {
 
     rl.initWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "raylib-zig [core] example - basic window");
     defer rl.closeWindow(); // Close window and OpenGL context
-                            //
 
     rl.setTargetFPS(60); // Set our game to run at 60 frames-per-second
     var ship = Ship.init(SCREEN_WIDTH / 2.0, SCREEN_HEIGHT / 2.0, false);
     var rng = std.Random.DefaultPrng.init(1234);
     const random = rng.random();
-    try create_asteroids(6, random, &asteroids);
+    try create_asteroids(6, wave, random, &asteroids);
 
     while (!rl.windowShouldClose()) { // Detect window close button or ESC key
         const frametime = rl.getFrameTime();
@@ -86,10 +94,10 @@ pub fn main() anyerror!void {
             if(rl.isKeyPressed(rl.KeyboardKey.r)){
                 is_game_over = false;
                 lives = 3;
-                wave = 0;
+                wave = 1;
                 ship = Ship.init(SCREEN_WIDTH / 2.0, SCREEN_HEIGHT / 2.0, false);
                 asteroids.clearRetainingCapacity();
-                try create_asteroids(6, random, &asteroids);
+                try create_asteroids(6, wave, random, &asteroids);
             }
             continue;
         }
@@ -100,6 +108,13 @@ pub fn main() anyerror!void {
         }
         for(bullets.items) |*bullet|{
             bullet.update(frametime);
+        }
+        if(wave > 2 and enemies.items.len == 0){
+            try enemies.append(Enemy.init(random));
+
+        }
+        for(enemies.items) |*enemy|{
+            enemy.update(frametime);
         }
 
         // Collision Detection
@@ -117,6 +132,11 @@ pub fn main() anyerror!void {
                     asteroid.kill();
                 }
             }
+            for(enemies.items) | *enemy |{
+                if(check_collision_circle(bullet.pos, bullet.size, enemy.pos,enemy.radius)){
+                    enemy.kill();
+                }
+            }
         }
         try asteroids.appendSlice(temp_asteroids.items);
 
@@ -127,13 +147,28 @@ pub fn main() anyerror!void {
                     break;
                 }
             }
+            for(enemy_bullets.items)|bullet|{
+                if(check_collision_circle(ship.pos, ship.size, bullet.pos, bullet.size)){
+                    ship.kill();
+                    break;
+                }
+            }
         }
 
         //clean up
+        var k: usize = enemies.items.len;
+        while (k > 0){
+            k -=1;
+            if(enemies.items[k].is_dead()){
+                score += 30 * wave;
+                _ = enemies.swapRemove(k);
+            }
+        }
         var i: usize = bullets.items.len; // start at the end;
         while (i > 0){
             i -= 1; // go one back, otherwise we will be out of scope
             if(bullets.items[i].is_dead()){
+                score += 10 * wave;
                 _ = bullets.swapRemove(i);
             }
         }
@@ -146,12 +181,13 @@ pub fn main() anyerror!void {
         }
         if(asteroids.items.len == 0 and !is_game_over){
             wave += 1;
-            try create_asteroids(6 * wave, random, &asteroids);
+            try create_asteroids(6 * wave, wave, random, &asteroids);
         }
 
         //Drawing
         for(asteroids.items)|*asteroid| {asteroid.draw();}
         for(bullets.items)|bullet|{bullet.draw();}
+        for(enemies.items)|*enemy| {enemy.draw();}
 
         var lives_buffer: [16]u8 = undefined;
         const lives_text = std.fmt.bufPrintZ(&lives_buffer, "Lives: {d}", .{lives}) catch "Lives ?";
