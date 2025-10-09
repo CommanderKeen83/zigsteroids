@@ -5,7 +5,7 @@
       <list><![CDATA[{
   "name": null,
   "version": null,
-  "path": "C:\\Users\\CommanderKeen\\programming\\zig_projects\\dancer",
+  "path": "C:\\Users\\Keen\\Programming\\zigsteroids",
   "steps": [
     {
       "name": "install",
@@ -43,7 +43,7 @@
 }]]><![CDATA[{
   "name": null,
   "version": null,
-  "path": "C:\\Users\\CommanderKeen\\AppData\\Local\\zig\\p\\raylib_zig-5.6.0-dev-KE8RECxEBQDwM9vp3RY9uvOduewuez61dojPyNO_L9Ph",
+  "path": "C:\\Users\\Keen\\AppData\\Local\\zig\\p\\raylib_zig-5.6.0-dev-KE8RECxEBQDwM9vp3RY9uvOduewuez61dojPyNO_L9Ph",
   "steps": [
     {
       "name": "install",
@@ -1349,7 +1349,7 @@
 }]]><![CDATA[{
   "name": null,
   "version": null,
-  "path": "C:\\Users\\CommanderKeen\\AppData\\Local\\zig\\p\\raylib-5.6.0-dev-whq8uCg2ywTzCiX3VEP9RuCMXR6_VnDBmkj8GjL_p5QN",
+  "path": "C:\\Users\\Keen\\AppData\\Local\\zig\\p\\raylib-5.6.0-dev-whq8uCg2ywTzCiX3VEP9RuCMXR6_VnDBmkj8GjL_p5QN",
   "steps": [
     {
       "name": "install",
@@ -3071,7 +3071,7 @@
 }]]><![CDATA[{
   "name": null,
   "version": null,
-  "path": "C:\\Users\\CommanderKeen\\AppData\\Local\\zig\\p\\N-V-__8AABHMqAWYuRdIlflwi8gksPnlUMQBiSxAqQAAZFms",
+  "path": "C:\\Users\\Keen\\AppData\\Local\\zig\\p\\N-V-__8AABHMqAWYuRdIlflwi8gksPnlUMQBiSxAqQAAZFms",
   "steps": [
     {
       "name": "install",
@@ -3089,7 +3089,7 @@
 }]]><![CDATA[{
   "name": null,
   "version": null,
-  "path": "C:\\Users\\CommanderKeen\\AppData\\Local\\zig\\p\\N-V-__8AAJl1DwBezhYo_VE6f53mPVm00R-Fk28NPW7P14EQ",
+  "path": "C:\\Users\\Keen\\AppData\\Local\\zig\\p\\N-V-__8AAJl1DwBezhYo_VE6f53mPVm00R-Fk28NPW7P14EQ",
   "steps": [
     {
       "name": "install",
@@ -3107,7 +3107,7 @@
 }]]><![CDATA[{
   "name": null,
   "version": null,
-  "path": "C:\\Users\\CommanderKeen\\AppData\\Local\\zig\\p\\zemscripten-0.2.0-dev-sRlDqApRAACspTbAZnuNKWIzfWzSYgYkb2nWAXZ-tqqt",
+  "path": "C:\\Users\\Keen\\AppData\\Local\\zig\\p\\zemscripten-0.2.0-dev-sRlDqApRAACspTbAZnuNKWIzfWzSYgYkb2nWAXZ-tqqt",
   "steps": [
     {
       "name": "install",
@@ -3131,7 +3131,7 @@
 }]]><![CDATA[{
   "name": null,
   "version": null,
-  "path": "C:\\Users\\CommanderKeen\\AppData\\Local\\zig\\p\\N-V-__8AALUbbwDKkSH4nbf3Ml_dTWo9qbELvle5i9eQZMuo",
+  "path": "C:\\Users\\Keen\\AppData\\Local\\zig\\p\\N-V-__8AALUbbwDKkSH4nbf3Ml_dTWo9qbELvle5i9eQZMuo",
   "steps": [
     {
       "name": "install",
@@ -3149,7 +3149,7 @@
 }]]><![CDATA[{
   "name": null,
   "version": null,
-  "path": "C:\\Users\\CommanderKeen\\AppData\\Local\\zig\\p\\zemscripten-0.2.0-dev-sRlDqFJSAAB8hgnRt5DDMKP3zLlDtMnUDwYRJVCa5lGY",
+  "path": "C:\\Users\\Keen\\AppData\\Local\\zig\\p\\zemscripten-0.2.0-dev-sRlDqFJSAAB8hgnRt5DDMKP3zLlDtMnUDwYRJVCa5lGY",
   "steps": [
     {
       "name": "install",
@@ -3173,5 +3173,5 @@
 }]]></list>
     </option>
   </component>
-  <component name="ZigToolchain" toolchain="e8d3d330-e396-4167-8397-50ab67dd6e6b" />
+  <component name="ZigToolchain" toolchain="0a0cdefa-6703-49d3-b266-5075c571a095" />
 </project>

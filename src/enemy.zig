@@ -10,6 +10,7 @@ pub const Enemy = struct{
     vel: rl.Vector2,
     radius: f32,
     direction_change_timer: f32,
+    shoot_timer: f32,
     dead: bool,
     const SPEED = 80.0;
     const WRAP_BUFFER: f32 = 50.0;
@@ -29,15 +30,26 @@ pub const Enemy = struct{
         return Enemy{
             //.pos = rl.Vector2{.x = xpos, .y = random.float(f32) * SCREEN_HEIGHT, },
             .pos = rl.Vector2{.x = xpos, .y = random.float(f32) * SCREEN_HEIGHT, },
-            .vel = rl.Vector2{.x = xvel, .y = 0, }, // default fly path is straight left or right, this will get adjusted in update-method
+            .vel = rl.Vector2{.x = xvel, .y = 50.0, }, // default fly path is straight left or right, this will get adjusted in update-method
             .radius = 10.0,
             .direction_change_timer = 2.0,
+            .shoot_timer = 2.5,
             .dead = false,
         };
     }
     pub fn update(self: *Enemy, dt: f32) void {
         self.pos.x += self.vel.x * dt;
         self.pos.y += self.vel.y * dt;
+        self.direction_change_timer -= dt;
+        if(self.ready_to_shoot()){
+            self.shoot_timer = 2.5;
+        }
+        self.shoot_timer -= dt;
+        if(self.direction_change_timer < 0 ){
+            self.direction_change_timer = 2.0;
+            self.vel.y *= -1;
+        }
+
         self.wrap_around_screen();
     }
     pub fn draw(self: *Enemy) void {
@@ -55,5 +67,8 @@ pub const Enemy = struct{
         if(self.pos.x > SCREEN_WIDTH + Enemy.WRAP_BUFFER) { self.pos.x = -Enemy.WRAP_BUFFER; }
         if(self.pos.y < -WRAP_BUFFER) { self.pos.y = SCREEN_HEIGHT + Enemy.WRAP_BUFFER; }
         if(self.pos.y > SCREEN_HEIGHT + Enemy.WRAP_BUFFER) { self.pos.y = -Enemy.WRAP_BUFFER; }
+    }
+    pub fn ready_to_shoot(self: *const Enemy) bool{
+        return self.shoot_timer <= 0;
     }
 };

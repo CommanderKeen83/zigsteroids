@@ -71,7 +71,7 @@ pub fn main() anyerror!void {
 
         if(rl.isKeyPressed(rl.KeyboardKey.space)){
             const pos = ship.get_gun_position();
-            try bullets.append(Bullet.init(pos, ship.get_angle()));
+            try bullets.append(Bullet.init_with_angle(pos, ship.get_angle()));
         }
         // update
         if(ship.is_dead()){
@@ -97,6 +97,9 @@ pub fn main() anyerror!void {
                 wave = 1;
                 ship = Ship.init(SCREEN_WIDTH / 2.0, SCREEN_HEIGHT / 2.0, false);
                 asteroids.clearRetainingCapacity();
+                enemies.clearRetainingCapacity();
+                bullets.clearRetainingCapacity();
+                enemy_bullets.clearRetainingCapacity();
                 try create_asteroids(6, wave, random, &asteroids);
             }
             continue;
@@ -109,12 +112,19 @@ pub fn main() anyerror!void {
         for(bullets.items) |*bullet|{
             bullet.update(frametime);
         }
+        for(enemy_bullets.items) |*bullet|{
+            bullet.update(frametime);
+        }
         if(wave > 2 and enemies.items.len == 0){
             try enemies.append(Enemy.init(random));
 
         }
         for(enemies.items) |*enemy|{
             enemy.update(frametime);
+            if(enemy.ready_to_shoot()){
+                const direction = get_direction_to_player(ship.pos, enemy.pos);
+                try enemy_bullets.append(Bullet.init_with_velocity(enemy.pos, direction));
+            }
         }
 
         // Collision Detection
@@ -143,6 +153,12 @@ pub fn main() anyerror!void {
         if(!ship.is_invicible()){
             for(asteroids.items)|asteroid|{
                 if(check_collision_circle(ship.pos, ship.size, asteroid.pos, asteroid.radius)){
+                    ship.kill();
+                    break;
+                }
+            }
+            for(enemies.items)|enemy|{
+                if(check_collision_circle(ship.pos, ship.size, enemy.pos, enemy.radius)){
                     ship.kill();
                     break;
                 }
@@ -187,6 +203,7 @@ pub fn main() anyerror!void {
         //Drawing
         for(asteroids.items)|*asteroid| {asteroid.draw();}
         for(bullets.items)|bullet|{bullet.draw();}
+        for(enemy_bullets.items)|bullet|{bullet.draw();}
         for(enemies.items)|*enemy| {enemy.draw();}
 
         var lives_buffer: [16]u8 = undefined;

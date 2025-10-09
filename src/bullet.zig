@@ -12,11 +12,20 @@ pub const Bullet = struct{
     dead: bool,
     pub const SPEED = 300.0;
     const MAX_LIFETIME = 2.0;
-    pub fn init(pos: rl.Vector2, angle: f32) Bullet{
+    pub fn init_with_angle(pos: rl.Vector2, angle: f32) Bullet{
         const rad = (angle - 90) * math.pi / 180.0;
         return Bullet{
             .pos = pos,
             .vel = rl.Vector2{.x = @cos(rad) * Bullet.SPEED, .y = @sin(rad) * Bullet.SPEED},
+            .lifetime = 0.0,
+            . size = 2.0,
+            .dead = false,
+        };
+    }pub fn init_with_velocity(pos: rl.Vector2, vel: rl.Vector2) Bullet{
+
+        return Bullet{
+            .pos = pos,
+            .vel = rl.math.vector2Scale(vel, Bullet.SPEED),
             .lifetime = 0.0,
             . size = 2.0,
             .dead = false,
