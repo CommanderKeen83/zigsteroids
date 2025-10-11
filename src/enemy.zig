@@ -41,9 +41,7 @@ pub const Enemy = struct{
         self.pos.x += self.vel.x * dt;
         self.pos.y += self.vel.y * dt;
         self.direction_change_timer -= dt;
-        if(self.ready_to_shoot()){
-            self.shoot_timer = 2.5;
-        }
+
         self.shoot_timer -= dt;
         if(self.direction_change_timer < 0 ){
             self.direction_change_timer = 2.0;
@@ -52,7 +50,7 @@ pub const Enemy = struct{
 
         self.wrap_around_screen();
     }
-    pub fn draw(self: *Enemy) void {
+    pub fn draw(self: *const Enemy) void {
         rl.drawCircle(@intFromFloat(self.pos.x), @intFromFloat(self.pos.y), self.radius, rl.Color.magenta);
     }
 
@@ -70,5 +68,10 @@ pub const Enemy = struct{
     }
     pub fn ready_to_shoot(self: *const Enemy) bool{
         return self.shoot_timer <= 0;
+    }
+    pub fn reload_weapon(self: *Enemy) void{
+        if(self.ready_to_shoot()){
+            self.shoot_timer = 2.5;
+        }
     }
 };

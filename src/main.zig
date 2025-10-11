@@ -41,7 +41,7 @@ pub fn main() anyerror!void {
     var lives:i32 = 3;
     var is_game_over = false;
     var score: i32 = 0;
-    var wave: u8 = 3;
+    var wave: u8 = 1;
     var bullets = std.array_list.Managed(Bullet).init(allocator);
     defer bullets.deinit();
     var enemy_bullets = std.array_list.Managed(Bullet).init(allocator);
@@ -91,10 +91,27 @@ pub fn main() anyerror!void {
                 10,
                 rl.Color.dark_green,
             );
+            var score_buffer: [16]u8 = undefined;
+            const score_text = std.fmt.bufPrintZ(&score_buffer, "Score: {d}", .{score}) catch "Score ?";
+            rl.drawText(score_text,
+                @intFromFloat(SCREEN_WIDTH / 2.0 - 150),
+                @intFromFloat(@as(f32, SCREEN_HEIGHT / 2.0) + 12),
+                10,
+                rl.Color.dark_green);
+
+            var wave_score_buffer: [16]u8 = undefined;
+            const wave_text = std.fmt.bufPrintZ(&wave_score_buffer, "Wave: {d}", .{wave}) catch "Wave ?";
+            rl.drawText(wave_text,
+                @intFromFloat(SCREEN_WIDTH / 2.0 - 150),
+                @intFromFloat(@as(f32,(SCREEN_HEIGHT / 2.0)) + 24),
+                10,
+                rl.Color.dark_green);
+
             if(rl.isKeyPressed(rl.KeyboardKey.r)){
                 is_game_over = false;
                 lives = 3;
                 wave = 1;
+                score = 0;
                 ship = Ship.init(SCREEN_WIDTH / 2.0, SCREEN_HEIGHT / 2.0, false);
                 asteroids.clearRetainingCapacity();
                 enemies.clearRetainingCapacity();
@@ -124,6 +141,7 @@ pub fn main() anyerror!void {
             if(enemy.ready_to_shoot()){
                 const direction = get_direction_to_player(ship.pos, enemy.pos);
                 try enemy_bullets.append(Bullet.init_with_velocity(enemy.pos, direction));
+                enemy.reload_weapon();
             }
         }
 
@@ -140,11 +158,13 @@ pub fn main() anyerror!void {
                     }
                     bullet.kill();
                     asteroid.kill();
+                    score += 10 * wave;
                 }
             }
             for(enemies.items) | *enemy |{
                 if(check_collision_circle(bullet.pos, bullet.size, enemy.pos,enemy.radius)){
                     enemy.kill();
+                    score += 30 * wave;
                 }
             }
         }
@@ -176,7 +196,7 @@ pub fn main() anyerror!void {
         while (k > 0){
             k -=1;
             if(enemies.items[k].is_dead()){
-                score += 30 * wave;
+
                 _ = enemies.swapRemove(k);
             }
         }
@@ -184,7 +204,6 @@ pub fn main() anyerror!void {
         while (i > 0){
             i -= 1; // go one back, otherwise we will be out of scope
             if(bullets.items[i].is_dead()){
-                score += 10 * wave;
                 _ = bullets.swapRemove(i);
             }
         }
